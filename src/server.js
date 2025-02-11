@@ -1,7 +1,6 @@
 import Fastify from "fastify"
 import fastifyBasicAuth from "@fastify/basic-auth"
 
-
 const port = 3000;
 const authenticate = {realm: 'Westeros'}
 
@@ -25,20 +24,27 @@ fastify.get('/dmz', {}, (req, res) => {
 })
 
 fastify.after(() => {
+    // Route protégée
     fastify.route({
         method: 'GET',
         url: '/secu',
-        onRequest: fastify.basicAuth,
+        onRequest: fastify.basicAuth, // Authentification requise
         handler: async (req, reply) => {
-            return {
-                replique: 'Un Lannister paye toujours ses dettes !'
-            }
+            return { replique: 'Un Lannister paye toujours ses dettes !' }
+        }
+    })
+
+    // Route publique
+    fastify.route({
+        method: 'GET',
+        url: '/autre',
+        handler: async (req, reply) => {
+            return { replique: "Je suis libre comme l'air !" }
         }
     })
 })
 
 fastify.setErrorHandler(function (err, req, reply) {
-
     if (err.statusCode === 401) {
         console.log(err)
         reply.code(401).send({replique: 'Tu ne sais rien, John Snow..'})
